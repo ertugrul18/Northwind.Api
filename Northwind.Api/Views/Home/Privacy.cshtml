@@ -1,0 +1,145 @@
+﻿@{
+    ViewData["Title"] = "Privacy Policy";
+}
+<h1>@ViewData["Title"]</h1>
+
+<button class="btn btn-primary" id="getCategories">Get All Categories</button>
+<button class="btn btn-secondary" id="newCategory" >New Category</button>
+<table id="category" class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <td>Id</td>
+            <td>Name</td>
+            <td>Aciklama</td>
+        </tr>
+    </thead>
+    <tbody id="tbody">
+
+    </tbody>
+</table>
+
+
+<div class="modal fade" id="categoryModal" role="dialog">
+    <div class="modal-dialog" role="form">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Yeni Kategori</h3>
+                <button type="button" class="btn-close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                    <div class="form-group">
+                        <label for="category-name" class="col-form-label">Name:</label>
+                        <input type="text" class="form-control" id="category-name">
+                        <input type="hidden" name="id" id="id" />
+                    </div>
+                    <div class="form-group">
+                        <label for="description-text" class="col-form-label">Message:</label>
+                        <textarea class="form-control" id="description-text"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="btnSave">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript">
+    
+        $(document).ready(function(){
+            var rowIdx = 0;
+            var apiurl = "https://northwind.vercel.app/api/categories/";
+
+
+            $("#newCategory").click(async function () {
+                deneme(1);
+
+                const { value: formValues } = await Swal.fire({
+                    title: 'Category inputs',
+                    html:
+                        '<input id="swal-input1" class="swal2-input">' +
+                        '<input id="swal-input2" class="swal2-input">',
+                    focusConfirm: false,
+                    preConfirm: () => {
+                        return [
+                            document.getElementById('swal-input1').value,
+                            document.getElementById('swal-input2').value
+                        ]
+                    } 
+                })
+
+                if (formValues) {
+
+                    Swal.fire(JSON.stringify(formValues))
+                    jQuery.ajax({
+                        url: apiurl,
+                        type: "POST",
+                        data: JSON.stringify(formValues),
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (resultData) {
+                            Swal.fire(
+                                'Good job!',
+                                'You clicked the button!',
+                                resultData
+                            )
+
+                          },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                        },
+
+                        timeout: 120000,
+                    });
+
+
+
+                }
+
+                });
+            
+            
+            $("#getCategories").click(function(){
+                jQuery.ajax({
+                    url: apiurl,
+                    type: "GET",
+
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (resultData) {
+                                               
+                        $.each(resultData, function (index, value) {
+                                               
+                        $('#tbody').append(`<tr id="R${++rowIdx}">
+                        <td class="row-index text-center"><p>${value.id}</p></td>
+                                <td class="row-index text-center"><p>${value.name}</p></td>
+                                        <td class="row-index text-center"><p>${value.description}</p></td>
+                                                            <td class="text-center"> <a class="btn btn-danger remove" id="${value.id}" onclick="deneme(${value.id})">Remove</a></td>
+                           </tr> 
+                           `);
+                        });
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                    },
+
+                    timeout: 120000,
+                });
+            });
+
+
+            function deneme(id)
+            {
+                Swal.fire("calisti " + id);
+            }
+
+            
+
+           
+        });
+    </script>
+
+}
